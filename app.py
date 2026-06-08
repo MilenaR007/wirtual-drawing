@@ -74,7 +74,7 @@ def draw_on_video(frame):
 
 # Build the Web UI
 with gr.Blocks() as demo:
-    gr.Markdown("# ⚡ Stable Rainbow Brush")
+    gr.Markdown("# Rainbow Wirtual Brush")
     gr.Markdown("Fixed UI layout. Colors shift rapidly, and strokes vanish after 5 seconds.")
     
     with gr.Row():
