@@ -6,7 +6,6 @@ import time
 
 # Initialize MediaPipe Hand Landmarker model
 mp_hands = mp.solutions.hands
-# Slightly lowered tracking confidence for faster performance on blurry webcam frames
 hands = mp_hands.Hands(max_num_hands=1, min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
 # Global variables for managing the drawing state
@@ -20,17 +19,12 @@ def draw_on_video(frame):
     if frame is None:
         return frame
         
-    # OPTIMIZATION: Resize the incoming frame to 640x480. 
-    # This drastically reduces network payload and processing time, reducing lag.
-    frame = cv2.resize(frame, (640, 480))
-        
     current_time = time.time()
     
     # Keep only the drawing segments that are younger than 5.0 seconds
     drawings = [segment for segment in drawings if current_time - segment['timestamp'] <= 5.0]
         
     # Mirror the image horizontally for natural hand-eye coordination
-    # (Delete the line below if you do NOT want a mirror effect)
     frame = cv2.flip(frame, 1)
     
     results = hands.process(frame)
@@ -57,7 +51,7 @@ def draw_on_video(frame):
                     'timestamp': current_time
                 })
                 
-                # FASTER RAINBOW: Decreasing hue by 8 instead of 1 for rapid color changes
+                # Rapid color change (shifting hue by 8 degrees)
                 hue_value = (hue_value - 8) % 180
             
             prev_x, prev_y = cx, cy
@@ -78,13 +72,15 @@ def draw_on_video(frame):
 
     return frame
 
+# Build the Web UI
 with gr.Blocks() as demo:
-    gr.Markdown("# ⚡ High-Speed Rainbow Brush")
-    gr.Markdown("Optimized for faster drawing with lower latency. Colors shift rapidly, and strokes vanish after 5 seconds.")
+    gr.Markdown("# ⚡ Stable Rainbow Brush")
+    gr.Markdown("Fixed UI layout. Colors shift rapidly, and strokes vanish after 5 seconds.")
     
     with gr.Row():
-        video_in = gr.Image(sources=["webcam"], streaming=True, label="Webcam Input")
-        video_out = gr.Image(label="Live Canvas")
+        # Added fixed height to prevent the UI from jumping/resizing infinitely
+        video_in = gr.Image(sources=["webcam"], streaming=True, label="Webcam Input", height=480)
+        video_out = gr.Image(label="Live Canvas", height=480)
         
     video_in.stream(draw_on_video, inputs=[video_in], outputs=[video_out])
 
