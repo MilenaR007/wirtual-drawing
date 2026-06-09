@@ -19,14 +19,14 @@ def draw_on_video(frame):
     if frame is None:
         return frame
         
+    # FIX: Create a writable copy of the incoming read-only frame
+    frame = frame.copy()
+        
     current_time = time.time()
     
     # Keep only the drawing segments that are younger than 5.0 seconds
     drawings = [segment for segment in drawings if current_time - segment['timestamp'] <= 5.0]
         
-    # MIRROR EFFECT REMOVED: 
-    # The cv2.flip() function was deleted so the camera shows the true, unmirrored image.
-    
     # Process the frame to find hand landmarks
     results = hands.process(frame)
     
@@ -83,11 +83,10 @@ def draw_on_video(frame):
 
 # Build the Web UI
 with gr.Blocks() as demo:
-    gr.Markdown("# Rainbow Wirtual Brush")
+    gr.Markdown("# ⚡ Stable Rainbow Brush (True View)")
     gr.Markdown("Fixed UI layout and disabled mirror reflection. Colors shift rapidly, and strokes vanish after 5 seconds.")
     
     with gr.Row():
-        # Added fixed height to prevent the UI from jumping/resizing infinitely
         video_in = gr.Image(sources=["webcam"], streaming=True, label="Webcam Input", height=480)
         video_out = gr.Image(label="Live Canvas", height=480)
         
